@@ -3,6 +3,7 @@ package control;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -36,7 +37,7 @@ public class Asiakkaat extends HttpServlet {
 			if(!hakusana.equals("")) {//Jos hakusana ei ole tyhja
 				asiakkaat = dao.getAllItems(hakusana); //Haetaan kaikki hakusanan mukaiset asiakkaat							
 			}else {
-				asiakkaat = dao.getAllItems(); //Haetaan kaikki autot
+				asiakkaat = dao.getAllItems(); //Haetaan kaikki asiakkaat
 			}
 			strJSON = new Gson().toJson(asiakkaat);	
 		}		
@@ -45,19 +46,41 @@ public class Asiakkaat extends HttpServlet {
 		out.println(strJSON);
 	}
 
-	
+    //Tietojen lisaaminen
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		System.out.println("Asiakkaat.doPost()");
-	}
+		//Luetaan JSON-tiedot POST-pyynn�n bodysta ja luodaan niiden perusteella uusi asiakas
+				String strJSONInput = request.getReader().lines().collect(Collectors.joining());
+				Asiakas asiakas = new Gson().fromJson(strJSONInput, Asiakas.class);	
+				//System.out.println(asiakas);
+				Dao dao = new Dao();
+				response.setContentType("application/json; charset=UTF-8");
+				PrintWriter out = response.getWriter();
+				if(dao.addItem(asiakas)) {
+					out.println("{\"response\":1}");  //Asiakkaan lisaaminen onnistui {"response":1}
+				}else {
+					out.println("{\"response\":0}");  //Asiakkaan lisaaminen epaonnistui {"response":0}
+				}
+			}
 
-	
+	//Tietojen muuttaminen
 	protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		System.out.println("Asiakkaat.doPut()");	
 	}
 
 	
-	protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		System.out.println("Asiakkaat.doDelete()");
-	}
+	//Tietojen poistaminen
+		protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+			System.out.println("Asiakkaat.doDelete()");
+			int asiakas_id = Integer.parseInt(request.getParameter("asiakas_id"));
+			Dao dao = new Dao();
+			response.setContentType("application/json; charset=UTF-8");
+			PrintWriter out = response.getWriter();
+			if(dao.removeItem(asiakas_id)) {
+				out.println("{\"response\":1}");  //Auton poistaminen onnistui {"response":1}
+			}else {
+				out.println("{\"response\":0}");  //Auton epaonnistui epaonnistui {"response":0}
+			}
+		}
 
-}
+	}
