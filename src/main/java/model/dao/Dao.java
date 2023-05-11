@@ -1,6 +1,5 @@
 package model.dao;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -20,10 +19,10 @@ public class Dao {
 	private Connection yhdista() {
 		Connection con = null;
 		String path = System.getProperty("catalina.base");
-		path = path.substring(0, path.indexOf(".metadata")).replace("\\", "/"); // Eclipsessa
-		// path =  new File(System.getProperty("user.dir")).getParentFile().toString() +"\\"; //Testauksessa
+		// path = path.substring(0, path.indexOf(".metadata")).replace("\\", "/"); // Eclipsessa
+		//path =  new File(System.getProperty("user.dir")).getParentFile().toString() +"\\"; //Testauksessa
 		//System.out.println(path); //Tästä näet mihin kansioon laitat tietokanta-tiedostosi
-		// path += "/webapps/"; //Tuotannossa. Laita tietokanta webapps-kansioon
+		path += "/webapps/"; //Tuotannossa. Laita tietokanta webapps-kansioon
 		String url = "jdbc:sqlite:" + path + db;
 		try {
 			Class.forName("org.sqlite.JDBC");
@@ -64,7 +63,7 @@ public class Dao {
 
 	public ArrayList<Asiakas> getAllItems() {
 		ArrayList<Asiakas> asiakkaat = new ArrayList<Asiakas>();
-		sql = "SELECT * FROM asiakkaat ORDER BY asiakas_id DESC"; //Suurin id tulee ensimmäisenä
+		sql = "SELECT * FROM asiakkaat ORDER BY asiakas_id DESC"; //Suurin asiakas_id tulee ensimmäisenä
 		try {
 			con = yhdista();
 			if (con != null) { // jos yhteys onnistui
@@ -78,7 +77,7 @@ public class Dao {
 						asiakas.setSukunimi(rs.getString(3));
 						asiakas.setPuhelin(rs.getString(4));
 						asiakas.setSposti(rs.getString(5));
-						asiakkaat.add(asiakas);		
+						asiakkaat.add(asiakas);			
 					}
 				}
 			}
@@ -100,6 +99,7 @@ public class Dao {
 				stmtPrep.setString(1, "%" + searchStr + "%");
 				stmtPrep.setString(2, "%" + searchStr + "%");
 				stmtPrep.setString(3, "%" + searchStr + "%");
+				stmtPrep.setString(4, "%" + searchStr + "%");
 				rs = stmtPrep.executeQuery();
 				if (rs != null) { // jos kysely onnistui
 					while (rs.next()) {
@@ -132,12 +132,13 @@ public class Dao {
 			stmtPrep.setString(3, asiakas.getPuhelin());
 			stmtPrep.setString(4, asiakas.getSposti());
 			stmtPrep.executeUpdate();
-		} catch (Exception e) {
-			paluuArvo=false;
+			//System.out.println("Uusin id on " + stmtPrep.getGeneratedKeys().getInt(1));	       
+		} catch (SQLException e) {				
 			e.printStackTrace();
+			paluuArvo=false;
 		} finally {
 			sulje();
-		}
+		}				
 		return paluuArvo;
 	}
 	
@@ -154,7 +155,7 @@ public class Dao {
 			paluuArvo=false;
 		} finally {
 			sulje();
-		}
+		}				
 		return paluuArvo;
 	}
 	
@@ -167,14 +168,14 @@ public class Dao {
 				stmtPrep = con.prepareStatement(sql); 
 				stmtPrep.setInt(1, asiakas_id);
         		rs = stmtPrep.executeQuery();  
-        		if(rs.isBeforeFirst()){ //jos kysely tuotti dataa, eli nimi on käytössä
+        		if(rs.isBeforeFirst()){ //jos kysely tuotti dataa, eli rekNo on käytössä
         			rs.next();
-        			asiakas = new Asiakas();        			
-        			asiakas.setAsiakas_id(rs.getInt(1));
+        			asiakas = new Asiakas();
+					asiakas.setAsiakas_id(rs.getInt(1));
 					asiakas.setEtunimi(rs.getString(2));
 					asiakas.setSukunimi(rs.getString(3));
 					asiakas.setPuhelin(rs.getString(4));
-					asiakas.setSposti(rs.getString(5));     			      			
+					asiakas.setSposti(rs.getString(5));    			      			
 				}        		
 			}			 
 		} catch (Exception e) {
@@ -187,7 +188,7 @@ public class Dao {
 	
 	public boolean changeItem(Asiakas asiakas){
 		boolean paluuArvo=true;
-		sql="UPDATE asiakkaat SET etunimi=?, sukunimi=?, puhelin=?, sposti=? WHERE asiakas_id=?";						  
+		sql="UPDATE Asiakkaat SET etunimi=?, sukunimi=?, puhelin=?, sposti=? WHERE asiakas_id=?";						  
 		try {
 			con = yhdista();
 			stmtPrep=con.prepareStatement(sql); 
@@ -196,8 +197,9 @@ public class Dao {
 			stmtPrep.setString(3, asiakas.getPuhelin());
 			stmtPrep.setString(4, asiakas.getSposti());
 			stmtPrep.setInt(5, asiakas.getAsiakas_id());
-			stmtPrep.executeUpdate();	        
-		} catch (Exception e) {				
+			stmtPrep.executeUpdate();
+			//System.out.println("Uusin id on " + stmtPrep.getGeneratedKeys().getInt(1));	       
+		} catch (SQLException e) {				
 			e.printStackTrace();
 			paluuArvo=false;
 		} finally {
@@ -223,5 +225,28 @@ public class Dao {
 			sulje();
 		}				
 		return paluuArvo;
+	}
+	
+	public String findUser(String uid, String pwd) {
+		String nimi = null;
+		sql="SELECT * FROM asiakkaat WHERE sposti=? AND salasana=?";						  
+		try {
+			con = yhdista();
+			if(con!=null){ 
+				stmtPrep = con.prepareStatement(sql); 
+				stmtPrep.setString(1, uid);
+				stmtPrep.setString(2, pwd);
+        		rs = stmtPrep.executeQuery();  
+        		if(rs.isBeforeFirst()){ //jos kysely tuotti dataa, eli asiakas löytyi
+        			rs.next();
+        			nimi = rs.getString("etunimi")+ " " +rs.getString("sukunimi");     			      			
+				}        		
+			}			        
+		} catch (Exception e) {				
+			e.printStackTrace();			
+		} finally {
+			sulje();
+		}				
+		return nimi;
 	}
 }

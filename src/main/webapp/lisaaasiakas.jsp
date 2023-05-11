@@ -1,15 +1,14 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
+<%@include file="header.jsp" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset=UTF-8">
 <script src="scripts/main.js"></script>
 <script src="scripts/io.js"></script>
 <link rel="stylesheet" type="text/css" href="css/main.css">
 <title>Asiakkaan lisäys</title>
 </head>
-<body onload="asetaFocus('etunimi')" onkeydown="tutkiKey(event, 'lisaa')">
+<body onload="asetaFocus('nimi')" onkeydown="tutkiKey(event, 'lisaa')">
 <form name="lomake">
 	<table>
 		<thead>	
@@ -31,7 +30,7 @@
 				<td><input type="text" name="puhelin" id="puhelin" /></td>
 				<td><input type="text" name="sposti" id="sposti" /></td> 
 				<td><input type="button" value="Lisää" onclick="tutkiJaLisaa()" /></td>
-			</tr>
+				</tr>
 		</tbody>
 	</table>
 </form>

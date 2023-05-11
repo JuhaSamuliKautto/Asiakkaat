@@ -26,9 +26,9 @@ class JUnit_testaa_asiakkaat {
 	public void testLisaaAsiakkaat() {
 		Dao dao = new Dao();
 		Asiakas asiakas_1 = new Asiakas(0,"Sami", "Koskinen", "040-5173344", "s@koskinen.com");
-		Asiakas asiakas_2 = new Asiakas(0, "Jaana", "Nieminen", "040-2233554", "jaana@nieminen.com");
-		Asiakas asiakas_3 = new Asiakas(0, "Markku", "Manninen", "040-1234896", "markku@manninen.com");
-		Asiakas asiakas_4 = new Asiakas(0, "Sampo", "Niemi", "050-7894563", "sampo.niemi@gmail.com");
+		Asiakas asiakas_2 = new Asiakas(0,"Jaana", "Nieminen", "040-2233554", "jaana@nieminen.com");
+		Asiakas asiakas_3 = new Asiakas(0,"Markku", "Manninen", "040-1234896", "markku@manninen.com");
+		Asiakas asiakas_4 = new Asiakas(0,"Sampo", "Niemi", "050-7894563", "sampo.niemi@gmail.com");
 		assertEquals(true, dao.addItem(asiakas_1)); //tai assertTrue(dao.addItem(asiakas_1));	
 		assertEquals(true, dao.addItem(asiakas_2));
 		assertEquals(true, dao.addItem(asiakas_3));

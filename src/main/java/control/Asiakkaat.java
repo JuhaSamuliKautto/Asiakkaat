@@ -10,6 +10,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import com.google.gson.Gson;
 
@@ -29,6 +30,10 @@ public class Asiakkaat extends HttpServlet {
 	//Tietojen hakeminen
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		System.out.println("Asiakkaat.doGet()");
+		HttpSession session = request.getSession(true);
+		if(session.getAttribute("kayttaja")==null){
+			return;
+		}
 		String hakusana = request.getParameter("hakusana");
 		String asiakas_id = request.getParameter("asiakas_id");
 		Dao dao = new Dao();
@@ -44,7 +49,10 @@ public class Asiakkaat extends HttpServlet {
 		}else if(asiakas_id!=null) {
 			Asiakas asiakas = dao.getItem(Integer.parseInt(asiakas_id));
 			strJSON = new Gson().toJson(asiakas);
-		}		
+		}else {
+			asiakkaat = dao.getAllItems(); //Haetaan kaikki asiakkaat
+			strJSON = new Gson().toJson(asiakkaat);	
+		}	
 		response.setContentType("application/json; charset=UTF-8");
 		PrintWriter out = response.getWriter();
 		out.println(strJSON);
@@ -53,7 +61,11 @@ public class Asiakkaat extends HttpServlet {
 	//Tietojen lisääminen
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		System.out.println("Asiakkaat.doPost()");
-		//Luetaan JSON-tiedot POST-pyynnän bodysta ja luodaan niiden perusteella uusi asiakas
+		HttpSession session = request.getSession(true);
+		if(session.getAttribute("kayttaja")==null){
+			return;
+		}
+		//Luetaan JSON-tiedot POST-pyynn�n bodysta ja luodaan niiden perusteella uusi asiakas
 		String strJSONInput = request.getReader().lines().collect(Collectors.joining());
 		Asiakas asiakas = new Gson().fromJson(strJSONInput, Asiakas.class);	
 		//System.out.println(asiakas);
@@ -70,6 +82,10 @@ public class Asiakkaat extends HttpServlet {
 	//Tietojen muuttaminen
 	protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		System.out.println("Asiakkaat.doPut()");	
+		HttpSession session = request.getSession(true);
+		if(session.getAttribute("kayttaja")==null){
+			return;
+		}
 		//Luetaan JSON-tiedot PUT-pyynnön bodysta ja luodaan niiden perusteella uusi asiakas
 		String strJSONInput = request.getReader().lines().collect(Collectors.joining());
 		//System.out.println("strJSONInput " + strJSONInput);		
@@ -88,15 +104,20 @@ public class Asiakkaat extends HttpServlet {
 	//Tietojen poistaminen
 	protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		System.out.println("Asiakkaat.doDelete()");
+		HttpSession session = request.getSession(true);
+		if(session.getAttribute("kayttaja")==null){
+			return;
+		}
 		int asiakas_id = Integer.parseInt(request.getParameter("asiakas_id"));
 		Dao dao = new Dao();
 		response.setContentType("application/json; charset=UTF-8");
 		PrintWriter out = response.getWriter();
-		if(dao.removeItem(asiakas_id)){ //metodi palauttaa true/false
-			out.println("{\"response\":1}"); //Asiakkaan poisto onnistui {"response":1}
+		if(dao.removeItem(asiakas_id)) {
+			out.println("{\"response\":1}");  //Asiakkaan poistaminen onnistui {"response":1}
 		}else {
-			out.println("{\"response\":0}"); //Asiakkaan poisto epäonnistui {"response":0}
+			out.println("{\"response\":0}");  //Asiakkaan poistaminen epäonnistui {"response":0}
 		}
 	}
 
 }
+

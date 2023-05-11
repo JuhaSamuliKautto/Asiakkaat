@@ -45,7 +45,7 @@ function tutkiTiedot(){
 		ilmo="Puhelin ei kelpaa!";	
 		document.getElementById("puhelin").focus();	
 	}else if(document.getElementById("sposti").value.length<8||document.getElementById("sposti").value.indexOf(".")==-1||document.getElementById("sposti").value.indexOf("@")==-1){
-		ilmo="Sähköposti ei kelpaa!";	
+		ilmo="sposti ei kelpaa!";	
 		document.getElementById("sposti").focus();	
 	}	
 	if(ilmo!=""){
